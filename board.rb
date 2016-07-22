@@ -1,6 +1,18 @@
-require './tile'
+require_relative 'tile'
+require 'byebug'
 
 class Board
+  NEIGHBORS = [
+    [1, 0],
+    [1, 1],
+    [1, -1],
+    [-1, 0],
+    [-1, 1],
+    [-1, -1],
+    [0, 1],
+    [0, -1]
+    ]
+
   attr_reader :grid
 
   def initialize(rows = 9, cols = 9, mines_count = 10)
@@ -25,6 +37,7 @@ class Board
       end
     end
     place_mines
+    assign_neighbor_bmbs
   end
 
   def place_mines
@@ -38,8 +51,38 @@ class Board
     end
   end
 
-  def assign_neighbors
+  def assign_neighbor_bmbs
+    (0...@rows_cnt).each do |row|
+      (0...@cols_cnt).each do |col|
+        if self[row, col].mine == true
+          add_to_neighbor_count([row, col])
+        end
+      end
+    end
+  end
 
+  def add_to_neighbor_count(pos)
+    neighbors(pos).each { |neighbor| self[*neighbor].neighbor_bmbs += 1 }
+  end
+
+  def neighbors(pos)
+    NEIGHBORS.map do |adj|
+      [adj[0] + pos[0], adj[1] + pos[1]]
+    end.select { |neighbor| valid_pos?(neighbor) }
+  end
+
+  def valid_pos?(pos)
+    row, col = pos
+    row.between?(0, @rows_cnt - 1) && col.between?(0, @cols_cnt - 1)
+  end
+
+  def explore_tiles(pos)
+    self[*pos].revealed = true
+    if self[*pos].neighbor_bmbs == 0
+      neighbors(pos).each do |neighbor|
+        explore_tiles(neighbor) if self[*neighbor].revealed == false
+      end
+    end
   end
 
   def render

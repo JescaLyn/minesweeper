@@ -1,10 +1,10 @@
 class Tile
-attr_accessor :mine, :revealed, :neighbors
+attr_accessor :mine, :revealed, :neighbor_bmbs
 
   def initialize
     @mine = false
     @revealed = false
-    @neighbors = 0
+    @neighbor_bmbs = 0
   end
 
   def display
@@ -13,7 +13,7 @@ attr_accessor :mine, :revealed, :neighbors
     elsif @mine == true
       "M"
     else
-      @neighbors.to_s
+      @neighbor_bmbs.to_s
     end
   end
 end
